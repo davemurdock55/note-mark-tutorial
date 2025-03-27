@@ -3,10 +3,10 @@ import {
   Content,
   DraggableTopBar,
   FloatingNoteTitle,
-  MarkdownEditor,
   NotePreviewList,
   RootLayout,
-  Sidebar
+  Sidebar,
+  TextEditor
 } from '@/components'
 import { useRef } from 'react'
 
@@ -25,9 +25,12 @@ const App = () => {
           <ActionButtonsRow className="flex justify-between mt-1" />
           <NotePreviewList className="mt-3 space-y-1" onSelect={resetScroll} />
         </Sidebar>
-        <Content ref={contentContainerRef} className="border-l bg-zinc-900/50 border-l-white/20">
-          <FloatingNoteTitle className="pt-2" />
-          <MarkdownEditor />
+
+        <Content
+          ref={contentContainerRef}
+          className="text-gray-700 border-l bg-white/50 border-l-white/20"
+        >
+          <TextEditor />
         </Content>
       </RootLayout>
     </>
