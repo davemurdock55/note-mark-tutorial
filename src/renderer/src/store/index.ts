@@ -54,33 +54,33 @@ export const selectedNoteAtom = unwrap(
     }
 )
 
-export const saveNoteAtom = atom(null, async (get, set, newContent: NoteContent) => {
-  const notes = get(notesAtom)
-  const selectedNote = get(selectedNoteAtom)
+// For src/renderer/src/store/index.ts
+export const saveNoteAtom = atom(
+  null,
+  async (get, set, params: { title: string; content: NoteContent }) => {
+    const { title, content } = params
+    const notes = get(notesAtom)
 
-  if (!selectedNote || !notes) return
+    if (!notes) return
 
-  // save on disk
-  await window.context.writeNote(selectedNote.title, newContent)
+    // save on disk
+    await window.context.writeNote(title, content)
 
-  // update the saved notes's last edit time
-  set(
-    // use jotai's set function
-    notesAtom, // to update the notesAtom
-    notes.map((note) => {
-      // for all of the notes in our notes array (in the jotai atom state)
-      // if the note is the currently selected note
-      if (note.title === selectedNote.title) {
-        return {
-          ...note,
-          lastEditTime: Date.now() // only updating the last edit time
+    // update the saved note's last edit time
+    set(
+      notesAtom,
+      notes.map((note) => {
+        if (note.title === title) {
+          return {
+            ...note,
+            lastEditTime: Date.now()
+          }
         }
-      }
-      // if the current note is not the selected note, just return it and continue
-      return note
-    })
-  )
-})
+        return note
+      })
+    )
+  }
+)
 
 export const createEmptyNoteAtom = atom(null, async (get, set) => {
   const notes = get(notesAtom)
@@ -123,3 +123,5 @@ export const deleteNoteAtom = atom(null, async (get, set) => {
   // (because we're always deleting the currently selected note)
   set(selectedNoteIndexAtom, null)
 })
+
+export const editorContentAtom = atom<string>('')

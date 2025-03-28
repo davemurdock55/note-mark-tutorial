@@ -1,13 +1,13 @@
 import { selectedNoteAtom } from '@renderer/store'
 import { useAtomValue } from 'jotai'
-import { ComponentProps } from 'react'
+import { ComponentProps, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { ActionButton, ActionButtonProps } from '@/components'
-import { Save, CircleUserRound } from 'lucide-react'
+import { SaveButton } from './Button/SaveButton'
+import { AccountButton } from './Button/AccountButton'
 
 export const FloatingNoteTitle = ({ className, ...props }: ComponentProps<'div'>) => {
+  const accountMenuRef = useRef<HTMLDivElement>(null)
   const selectedNote = useAtomValue(selectedNoteAtom)
-
   if (!selectedNote) return <div className="min-h-8"></div>
 
   return (
@@ -21,12 +21,10 @@ export const FloatingNoteTitle = ({ className, ...props }: ComponentProps<'div'>
       <div className="flex-1"></div>
       <span className="font-medium text-cyan-400">{selectedNote.title}</span>
       <div className="flex justify-end flex-1 gap-2">
-        <ActionButton className="hover:bg-slate-300/50 hover:text-gray-500">
-          <Save className="size-5 text-zinc-500 dark:text-zinc-300" />
-        </ActionButton>
-        <ActionButton className="hover:bg-slate-300/50 hover:text-gray-500">
-          <CircleUserRound className="size-5 text-zinc-500 dark:text-zinc-300" />
-        </ActionButton>
+        <SaveButton />
+        <div className="relative" ref={accountMenuRef}>
+          <AccountButton menuRef={accountMenuRef} />
+        </div>
       </div>
     </div>
   )

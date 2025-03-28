@@ -1,5 +1,5 @@
 import { MDXEditorMethods } from '@mdxeditor/editor'
-import { saveNoteAtom, selectedNoteAtom } from '@renderer/store'
+import { saveNoteAtom, selectedNoteAtom, editorContentAtom } from '@renderer/store'
 import { autoSavingTime } from '@shared/constants'
 import { NoteContent } from '@shared/models'
 import { useAtomValue, useSetAtom } from 'jotai'
@@ -8,39 +8,48 @@ import { useRef } from 'react'
 
 export const useMarkdownEditor = () => {
   const selectedNote = useAtomValue(selectedNoteAtom)
-  const saveNote = useSetAtom(saveNoteAtom) // essentially an atom function to save the note
-  const editorRef = useRef<MDXEditorMethods>(null) // current markdown stored as a string
+  const saveNote = useSetAtom(saveNoteAtom)
+  const editorRef = useRef<MDXEditorMethods>(null)
+  const editorContent = useAtomValue(editorContentAtom)
 
-  // throttling this so it doesn't happen with every keyboard stroke (from the onChange this is in)
   const handleAutoSaving = throttle(
     async (content: NoteContent) => {
-      if (!selectedNote) return // if the selected note is null/undefined, just return
+      if (!selectedNote) return
 
-      console.info('Auto saving: ', selectedNote.title, '...')
+      // Capture the current title to prevent race conditions
+      const noteTitle = selectedNote.title
 
-      await saveNote(content)
+      console.info('Auto saving: ', noteTitle, '...')
+      await saveNote({ title: noteTitle, content })
     },
-    autoSavingTime, // the amount of time to wait before auto-saving again (3s right now)
+    autoSavingTime,
     {
       leading: false,
       trailing: true
     }
   )
 
-  // fixing auto-saving issue with changing selected notes too fast
+  const handleTextEditorBlur = async () => {
+    if (!selectedNote) return
+
+    // Capture title before any potential state changes
+    const noteTitle = selectedNote.title
+
+    handleAutoSaving.cancel()
+    await saveNote({ title: noteTitle, content: editorContent })
+  }
+
   const handleBlur = async () => {
     if (!selectedNote) return
 
-    // cancel the auto-saving function
-    handleAutoSaving.cancel()
+    // Capture title before any potential state changes
+    const noteTitle = selectedNote.title
 
-    // getting the content of the note the user was editing before
+    handleAutoSaving.cancel()
     const content = editorRef.current?.getMarkdown()
 
-    // as long as that content isn't null...
     if (content != null) {
-      // ...we're going to run the saveNote function (which should auto-save)
-      await saveNote(content)
+      await saveNote({ title: noteTitle, content })
     }
   }
 
@@ -48,6 +57,7 @@ export const useMarkdownEditor = () => {
     editorRef,
     selectedNote,
     handleAutoSaving,
+    handleTextEditorBlur,
     handleBlur
   }
 }

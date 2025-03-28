@@ -1,10 +1,21 @@
-// In TextEditor.tsx - modified version
 import { useMarkdownEditor } from '@renderer/hooks/useMarkdownEditor'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useSetAtom } from 'jotai'
+import { editorContentAtom } from '@renderer/store'
 
 export const TextEditor = () => {
-  const { selectedNote, handleAutoSaving, handleBlur } = useMarkdownEditor()
+  const { selectedNote, handleAutoSaving, handleTextEditorBlur } = useMarkdownEditor()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [content, setContent] = useState('')
+  const setEditorContent = useSetAtom(editorContentAtom) // Get the setter for the editor content atom
+
+  // Set initial content when note changes
+  useEffect(() => {
+    if (selectedNote) {
+      setContent(selectedNote.content)
+      setEditorContent(selectedNote.content) // Set the editor content atom
+    }
+  }, [selectedNote?.title, setEditorContent])
 
   // Focus the textarea when the note changes
   useEffect(() => {
@@ -39,8 +50,13 @@ export const TextEditor = () => {
     const selectionStart = e.target.selectionStart
     const selectionEnd = e.target.selectionEnd
 
+    // Update content state
+    const newContent = e.target.value
+    setContent(newContent)
+    setEditorContent(newContent) // Update the editor content atom
+
     // Handle auto-saving
-    handleAutoSaving(e.target.value)
+    handleAutoSaving(newContent)
 
     // Restore cursor position (after React updates)
     setTimeout(() => {
@@ -56,9 +72,9 @@ export const TextEditor = () => {
     <textarea
       ref={textareaRef}
       key={selectedNote.title}
-      defaultValue={selectedNote.content}
+      value={content} // Use controlled component instead of defaultValue
       onChange={handleChange}
-      onBlur={handleBlur}
+      onBlur={handleTextEditorBlur}
       className="w-full min-h-full px-8 py-5 text-lg bg-transparent outline-none resize-none caret-cyan-400 selection:bg-cyan-300"
       placeholder="Start typing your note here..."
       style={{ overflow: 'hidden' }} // Hide scrollbars on the textarea
