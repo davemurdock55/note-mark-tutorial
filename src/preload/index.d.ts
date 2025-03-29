@@ -1,4 +1,11 @@
-import { CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote } from '@shared/types'
+import {
+  CreateNote,
+  DeleteNote,
+  GetNotes,
+  ReadNote,
+  WriteNote,
+  SyncNotesWithCloud
+} from '@shared/types'
 
 // defining the structure/types for the global window.context object
 declare global {
@@ -11,6 +18,7 @@ declare global {
       writeNote: WriteNote
       createNote: CreateNote
       deleteNote: DeleteNote
+      syncNotesWithCloud: SyncNotesWithCloud
     }
   }
 }

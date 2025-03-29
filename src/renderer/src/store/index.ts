@@ -124,4 +124,24 @@ export const deleteNoteAtom = atom(null, async (get, set) => {
   set(selectedNoteIndexAtom, null)
 })
 
+export const syncNotesAtom = atom(null, async (get, set) => {
+  const notes = get(notesAtom)
+
+  if (!notes) return
+
+  try {
+    // Sync notes to cloud
+    await window.context.syncNotesWithCloud()
+
+    // Refresh the notes list
+    const updatedNotes = await loadNotes()
+    set(notesAtom, updatedNotes)
+
+    return true
+  } catch (error) {
+    console.error('Sync failed:', error)
+    return false
+  }
+})
+
 export const editorContentAtom = atom<string>('')

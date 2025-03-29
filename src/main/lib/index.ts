@@ -17,6 +17,7 @@ export const getNotes: GetNotes = async () => {
 
   await ensureDir(rootDir)
 
+  // get all the file names in the root directory
   const notesFileNames = await readdir(rootDir, {
     encoding: fileEncoding,
     withFileTypes: false

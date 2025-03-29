@@ -24,6 +24,7 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
     "@mdxeditor/editor": "^3.20.0",
+    "axios": "^1.8.4",
     "fs-extra": "^11.3.0",
     "jotai": "^2.11.0",
     "lucide-react": "^0.484.0"
