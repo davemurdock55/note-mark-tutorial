@@ -121,7 +121,7 @@ export const TextEditor = () => {
       value={content} // Use controlled component instead of defaultValue
       onChange={handleChange}
       onBlur={handleTextEditorBlur}
-      className="w-full min-h-full px-8 py-5 text-lg bg-transparent outline-none resize-none caret-cyan-400 selection:bg-cyan-300 dark:selection:bg-cyan-400/90 dark:selection:text-gray-700"
+      className="w-full min-h-full px-8 py-5 text-lg bg-transparent outline-none resize-none caret-cyan-400 selection:bg-cyan-400 selection:text-white dark:selection:bg-cyan-400/90 dark:selection:text-gray-700"
       placeholder="Start typing your note here..."
       style={{ overflow: 'hidden' }} // Hide scrollbars on the textarea
     />
