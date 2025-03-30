@@ -1,5 +1,10 @@
+import { UserCredentials } from './auth-types'
 import { NoteContent, NoteInfo } from './models'
 
+export type Login = (username: string, password: string) => Promise<UserCredentials>
+export type Signup = (name: string, username: string, password: string) => Promise<UserCredentials>
+export type Logout = () => Promise<boolean>
+export type GetCurrentUser = () => Promise<UserCredentials>
 export type GetNotes = () => Promise<NoteInfo[]>
 export type ReadNote = (title: NoteInfo['title']) => Promise<NoteContent>
 export type WriteNote = (title: NoteInfo['title'], content: NoteContent) => Promise<void>

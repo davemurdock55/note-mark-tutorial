@@ -1,6 +1,84 @@
 import { NoteContent, NoteInfo } from '@shared/models'
 import { atom } from 'jotai'
 import { unwrap } from 'jotai/utils'
+import { UserCredentials, defaultUserState } from '@shared/auth-types'
+
+// Load current user on app start
+const loadCurrentUser = async () => {
+  try {
+    return await window.context.getCurrentUser()
+  } catch (error) {
+    console.error('Failed to load user:', error)
+    return defaultUserState
+  }
+}
+
+// Create auth atoms
+const currentUserAtomAsync = atom<UserCredentials | Promise<UserCredentials>>(loadCurrentUser())
+export const currentUserAtom = unwrap(currentUserAtomAsync, (prev) => prev || defaultUserState)
+
+export const loginAtom = atom(
+  null,
+  async (get, set, params: { username: string; password: string }) => {
+    try {
+      const { username, password } = params
+      const user = await window.context.login(username, password)
+
+      // Check for error message
+      if (user.errorMessage) {
+        console.error('Login error:', user.errorMessage)
+        return { success: false, message: user.errorMessage }
+      }
+
+      set(currentUserAtom, user)
+      return { success: user.isLoggedIn, message: '' }
+    } catch (error) {
+      console.error('Login error:', error)
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      }
+    }
+  }
+)
+
+export const signupAtom = atom(
+  null,
+  async (get, set, params: { name: string; username: string; password: string }) => {
+    try {
+      const { name, username, password } = params
+      const user = await window.context.signup(name, username, password)
+
+      // Check for error message
+      if (user.errorMessage) {
+        console.error('Signup error:', user.errorMessage)
+        return { success: false, message: user.errorMessage }
+      }
+
+      set(currentUserAtom, user)
+      return { success: user.isLoggedIn, message: '' }
+    } catch (error) {
+      console.error('Signup error:', error)
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      }
+    }
+  }
+)
+
+export const logoutAtom = atom(null, async (get, set) => {
+  try {
+    const success = await window.context.logout()
+    if (success) {
+      set(currentUserAtom, defaultUserState)
+    }
+    return success
+  } catch (error) {
+    console.error('Logout error:', error)
+    return false
+  }
+})
 
 // using the window.context (which calls the backend getNotes function)
 const loadNotes = async () => {

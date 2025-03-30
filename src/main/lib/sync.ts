@@ -4,7 +4,7 @@ import { readdir } from 'fs-extra'
 import { fileEncoding, protoNoteAPI } from '@shared/constants'
 import { FullNote } from '@shared/models'
 import { getCurrentUser } from './user'
-import { UserCredentials } from '@shared/auth'
+import { UserCredentials } from '@shared/auth-types'
 
 const SYNC_ENDPOINT = `${protoNoteAPI}/notes/sync`
 

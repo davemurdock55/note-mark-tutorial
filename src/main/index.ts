@@ -1,8 +1,13 @@
 import { createNote, deleteNote, getNotes, readNote, writeNote } from '@/lib'
+import { login, signup, logout, getCurrentUser } from '@/lib/user'
 import { syncNotesWithCloud } from '@/lib/sync'
 
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import {
+  Login,
+  Signup,
+  Logout,
+  GetCurrentUser,
   CreateNote,
   DeleteNote,
   GetNotes,
@@ -72,6 +77,12 @@ app.whenReady().then(() => {
   // ipcMain.on('ping', () => console.log('pong'))
 
   // getNotes 'backend' listener
+  ipcMain.handle('login', (_, ...args: Parameters<Login>) => login(...args))
+  ipcMain.handle('signup', (_, ...args: Parameters<Signup>) => signup(...args))
+  ipcMain.handle('logout', (_, ...args: Parameters<Logout>) => logout(...args))
+  ipcMain.handle('getCurrentUser', (_, ...args: Parameters<GetCurrentUser>) =>
+    getCurrentUser(...args)
+  )
   ipcMain.handle('getNotes', (_, ...args: Parameters<GetNotes>) => getNotes(...args))
   ipcMain.handle('readNote', (_, ...args: Parameters<ReadNote>) => readNote(...args))
   ipcMain.handle('writeNote', (_, ...args: Parameters<WriteNote>) => writeNote(...args))

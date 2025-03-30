@@ -1,4 +1,8 @@
 import {
+  Login,
+  Signup,
+  Logout,
+  GetCurrentUser,
   CreateNote,
   DeleteNote,
   GetNotes,
@@ -13,6 +17,10 @@ declare global {
     // electron: ElectronAPI
     context: {
       locale: string
+      login: Login
+      signup: Signup
+      logout: Logout
+      getCurrentUser: GetCurrentUser
       getNotes: GetNotes
       readNote: ReadNote
       writeNote: WriteNote

@@ -8,13 +8,22 @@ import {
   Sidebar,
   TextEditor
 } from '@/components'
+import { AuthPage } from '@/components/Auth/AuthPage'
 import { useRef } from 'react'
+import { useAtomValue } from 'jotai'
+import { currentUserAtom } from '@renderer/store'
 
 const App = () => {
   const contentContainerRef = useRef<HTMLDivElement>(null)
+  const user = useAtomValue(currentUserAtom)
 
   const resetScroll = () => {
     contentContainerRef.current?.scrollTo(0, 0)
+  }
+
+  // If not logged in, show auth page
+  if (!user.isLoggedIn) {
+    return <AuthPage onAuthenticated={() => {}} />
   }
 
   return (

@@ -1,12 +1,12 @@
-{
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "never",
-    "source.organizeImports": "never"
-  },
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.wordWrap": "on",
-  "markdownlint.config": {
-    "MD041": false
-  }
-}
+// {
+//   "editor.codeActionsOnSave": {
+//     "source.fixAll.eslint": "never",
+//     "source.organizeImports": "never"
+//   },
+//   "editor.formatOnSave": true,
+//   "editor.defaultFormatter": "esbenp.prettier-vscode",
+//   "editor.wordWrap": "on",
+//   "markdownlint.config": {
+//     "MD041": false
+//   }
+// }
