@@ -6,14 +6,14 @@ import { SaveButton } from './Button/SaveButton'
 import { AccountButton } from './Button/AccountButton'
 import { SyncButton } from './Button/SyncButton'
 
-export const FloatingNoteTitle = ({ className, ...props }: ComponentProps<'div'>) => {
+export const TitleBar = ({ className, ...props }: ComponentProps<'div'>) => {
   const accountMenuRef = useRef<HTMLDivElement>(null)
   const selectedNote = useAtomValue(selectedNoteAtom)
 
   return (
     <header
       className={twMerge(
-        'flex items-center py-2 bg-white/90 backdrop-blur-sm shadow-sm absolute top-0 left-0 right-2 z-10 px-5 h-12 app-drag-handle',
+        'flex items-center py-2 bg-white/70 dark:bg-gray-700/50 backdrop-blur-md shadow-sm absolute top-0 left-0 right-2 z-10 px-5 h-12 app-drag-handle',
         className
       )}
       {...props}
@@ -21,14 +21,13 @@ export const FloatingNoteTitle = ({ className, ...props }: ComponentProps<'div'>
       <div className="flex-1">
         <SyncButton />
       </div>
-
       <span className="font-medium text-cyan-400">
-        {selectedNote ? selectedNote.title : 'No Note Selected'}
+        {selectedNote ? selectedNote.title : 'Proto-Note'}
       </span>
       <div className="flex justify-end flex-1 gap-2">
         {selectedNote && <SaveButton />}
-        <div className="relative" ref={accountMenuRef}>
-          <AccountButton menuRef={accountMenuRef} />
+        <div className="relative">
+          <AccountButton />
         </div>
       </div>
     </header>

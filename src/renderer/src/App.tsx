@@ -2,7 +2,7 @@ import {
   ActionButtonsRow,
   Content,
   DraggableTopBar,
-  FloatingNoteTitle,
+  TitleBar,
   NotePreviewList,
   RootLayout,
   Sidebar,
@@ -21,14 +21,14 @@ const App = () => {
     <>
       <DraggableTopBar />
       <RootLayout>
-        <Sidebar className="p-2">
+        <Sidebar className="px-2">
           <ActionButtonsRow className="flex justify-between mt-1" />
           <NotePreviewList className="mt-3 space-y-1" onSelect={resetScroll} />
         </Sidebar>
 
         <Content
           ref={contentContainerRef}
-          className="text-gray-700 border-l bg-white/50 border-l-white/20"
+          className="text-gray-700 border-l dark:text-white bg-white/50 dark:bg-gray-900/50 border-l-white/20"
         >
           <TextEditor />
         </Content>

@@ -24,14 +24,23 @@ export const TextEditor = () => {
     }
   }, [selectedNote?.title])
 
-  // This effect adjusts the size of the textarea to match its content
   useEffect(() => {
     const textarea = textareaRef.current
     if (!textarea) return
 
     const adjustHeight = () => {
+      // Store the current scroll position of the parent container
+      const container = textarea.parentElement
+      const scrollTop = container?.scrollTop || 0
+
+      // Adjust height
       textarea.style.height = 'auto'
       textarea.style.height = `${textarea.scrollHeight}px`
+
+      // Restore scroll position
+      if (container) {
+        container.scrollTop = scrollTop
+      }
     }
 
     // Initial resize
@@ -40,28 +49,65 @@ export const TextEditor = () => {
     // Setup event listeners
     textarea.addEventListener('input', adjustHeight)
 
+    // Force height adjustment after content is set
+    const timer = setTimeout(adjustHeight, 0)
+
     return () => {
       textarea.removeEventListener('input', adjustHeight)
+      clearTimeout(timer)
     }
-  }, [selectedNote?.title]) // Re-run when selected note changes
+  }, [selectedNote?.title, content]) // Add content to dependencies
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     // Store cursor position
     const selectionStart = e.target.selectionStart
     const selectionEnd = e.target.selectionEnd
 
-    // Update content state
+    // Store scroll position of the parent container
+    const container = textareaRef.current?.parentElement
+    const scrollTop = container?.scrollTop || 0
+
+    // Get old and new content to detect new lines
+    const oldContent = content
     const newContent = e.target.value
+
+    // Check if a new line was added
+    const newLineAdded = newContent.split('\n').length > oldContent.split('\n').length
+
+    // Update content state
     setContent(newContent)
     setEditorContent(newContent) // Update the editor content atom
 
     // Handle auto-saving
     handleAutoSaving(newContent)
 
-    // Restore cursor position (after React updates)
+    // Restore cursor and scroll position (after React updates)
     setTimeout(() => {
-      if (textareaRef.current) {
+      if (textareaRef.current && container) {
         textareaRef.current.setSelectionRange(selectionStart, selectionEnd)
+
+        // If a new line was added, ensure cursor is visible
+        if (newLineAdded) {
+          // Calculate cursor position in the textarea
+          const textareaRect = textareaRef.current.getBoundingClientRect()
+          const lineHeight = parseInt(getComputedStyle(textareaRef.current).lineHeight) || 24
+
+          // Estimate cursor position
+          const cursorY = Math.floor(selectionStart / (newContent.length / textareaRect.height))
+
+          // If cursor is near the bottom of the visible area, scroll down a bit
+          const scrollMargin = lineHeight * 2
+          const cursorBottom = cursorY + scrollMargin
+          const visibleBottom = scrollTop + container.clientHeight
+
+          if (cursorBottom > visibleBottom) {
+            container.scrollTop = scrollTop + lineHeight
+          } else {
+            container.scrollTop = scrollTop
+          }
+        } else {
+          container.scrollTop = scrollTop
+        }
       }
     }, 0)
   }
@@ -75,7 +121,7 @@ export const TextEditor = () => {
       value={content} // Use controlled component instead of defaultValue
       onChange={handleChange}
       onBlur={handleTextEditorBlur}
-      className="w-full min-h-full px-8 py-5 text-lg bg-transparent outline-none resize-none caret-cyan-400 selection:bg-cyan-300"
+      className="w-full min-h-full px-8 py-5 text-lg bg-transparent outline-none resize-none caret-cyan-400 selection:bg-cyan-300 dark:selection:bg-cyan-400/90 dark:selection:text-gray-700"
       placeholder="Start typing your note here..."
       style={{ overflow: 'hidden' }} // Hide scrollbars on the textarea
     />

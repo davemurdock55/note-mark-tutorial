@@ -1,36 +1,18 @@
-import { useRef, useState, useEffect } from 'react'
+import { useState } from 'react'
 import { ActionButton } from './ActionButton'
 import { AccountMenu } from '../AccountMenu'
 import { CircleUserRound } from 'lucide-react'
 
-interface AccountButtonProps {
-  menuRef: React.RefObject<HTMLDivElement>
-}
-
-export const AccountButton = ({ menuRef }: AccountButtonProps) => {
+export const AccountButton = () => {
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsAccountMenuOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
 
   return (
     <>
       <ActionButton
-        className="hover:bg-slate-300/50 hover:text-gray-500"
+        className="hover:bg-slate-300/50 text-zinc-500 dark:text-zinc-300 hover:text-gray-500 dark:hover:text-cyan-400 dark:active:bg-slate-400/50"
         onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
       >
-        <CircleUserRound className="size-5 text-zinc-500 dark:text-zinc-300" />
+        <CircleUserRound className="size-5" />
       </ActionButton>
 
       {isAccountMenuOpen && <AccountMenu setIsAccountMenuOpen={setIsAccountMenuOpen} />}
