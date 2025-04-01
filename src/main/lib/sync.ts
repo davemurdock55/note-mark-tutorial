@@ -6,7 +6,7 @@ import { FullNote } from '@shared/models'
 import { getCurrentUser } from './user'
 import { UserCredentials } from '@shared/auth-types'
 
-const SYNC_ENDPOINT = `${protoNoteAPI}/notes/sync`
+const NOTES_ENDPOINT = `${protoNoteAPI}/notes`
 
 export const syncNotesWithCloud = async () => {
   const rootDir = getRootDir()
@@ -40,18 +40,31 @@ export const syncNotesWithCloud = async () => {
   // Send all notes in one request
   try {
     // Send username, notes, and lastSyncedTime
-    const response = await axios.post(SYNC_ENDPOINT, {
-      username: currentUser.username,
-      notes: notesPayload
-    })
-    console.log('Sync response:', response.data)
+    const response = await axios.post(
+      `${NOTES_ENDPOINT}/sync`,
+      {
+        username: currentUser.username,
+        notes: notesPayload
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${currentUser.token}`
+        }
+      }
+    )
 
     // Process the response to reconcile with local files
-    await reconcileWithCloudNotes(response.data, notesPayload)
+    await reconcileWithCloudNotes(response.data.notes, notesPayload)
 
     return true
   } catch (error) {
-    console.error('Error syncing notes with cloud:', error)
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Error syncing notes with cloud:')
+      console.error('Status:', error.response.status)
+      console.error('Message:', error.response.data)
+    } else {
+      console.error('Error syncing notes with cloud:', error)
+    }
     return false
   }
 }

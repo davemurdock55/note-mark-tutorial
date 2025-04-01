@@ -54,8 +54,8 @@ export const SignupForm = ({ onSuccess, onSwitchToLogin }: SignupFormProps) => {
 
   return (
     <div className="w-full max-w-md p-6 mx-auto shadow-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl">
-      <h2 className="mb-6 text-2xl font-bold text-center text-gray-800 dark:text-white">
-        Create your NoteMark account
+      <h2 className="mb-6 text-2xl font-bold text-center text-cyan-400 dark:text-white">
+        Create your Proto-Note account
       </h2>
 
       {error && (
@@ -73,7 +73,7 @@ export const SignupForm = ({ onSuccess, onSwitchToLogin }: SignupFormProps) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 text-white border border-gray-300 rounded-md bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:text-white bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             required
           />
         </div>
@@ -86,7 +86,7 @@ export const SignupForm = ({ onSuccess, onSwitchToLogin }: SignupFormProps) => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 text-white border border-gray-300 rounded-md bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:text-white bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             required
           />
         </div>
@@ -99,7 +99,7 @@ export const SignupForm = ({ onSuccess, onSwitchToLogin }: SignupFormProps) => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 text-white border border-gray-300 rounded-md bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:text-white bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             required
           />
         </div>
@@ -112,7 +112,7 @@ export const SignupForm = ({ onSuccess, onSwitchToLogin }: SignupFormProps) => {
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-3 py-2 text-white border border-gray-300 rounded-md bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:text-white bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             required
           />
         </div>
@@ -120,7 +120,7 @@ export const SignupForm = ({ onSuccess, onSwitchToLogin }: SignupFormProps) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full px-4 py-2 text-white rounded-md bg-cyan-500 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-gray-400"
+          className="w-full px-4 py-2 text-white rounded-md dark:text-white bg-cyan-500 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:bg-gray-400"
         >
           {isLoading ? 'Creating account...' : 'Sign Up'}
         </button>

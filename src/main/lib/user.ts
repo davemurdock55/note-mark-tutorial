@@ -16,15 +16,15 @@ const AUTH_ENDPOINT = `${protoNoteAPI}/auth`
 export const login = async (username: string, password: string): Promise<UserCredentials> => {
   try {
     // In a real app, you'd make an API call here
-    const response = await axios.post(`${AUTH_ENDPOINT}/login`, {
+    const loginResponse = await axios.post(`${AUTH_ENDPOINT}/login`, {
       username,
       password
     })
 
     const credentials: UserCredentials = {
-      name: response.data.name || 'User',
+      name: loginResponse.data.response?.name || 'User',
       username,
-      token: response.data.token || 'dummy-token',
+      token: loginResponse.data.response?.token || 'dummy-token',
       isLoggedIn: true
     }
 
@@ -71,7 +71,6 @@ export const signup = async (
     })
 
     if (response.status === 200) {
-      // FIXME: Doesn't seem to be giving us a token in the DB (even though manually signing in does)???
       return login(username, password)
     }
 
@@ -115,11 +114,13 @@ export const logout = async (): Promise<boolean> => {
     // Only call the API if the user is logged in and has a token
     if (currentUser.isLoggedIn && currentUser.token) {
       try {
-        // FIXME: Doesn't seem to be removing the token in the DB???
         // Make API call to logout with the token in the authorization header
         await axios.post(
           `${AUTH_ENDPOINT}/logout`,
-          {},
+          {
+            username: currentUser.username,
+            token: currentUser.token
+          },
           {
             headers: {
               Authorization: `Bearer ${currentUser.token}`

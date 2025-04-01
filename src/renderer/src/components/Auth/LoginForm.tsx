@@ -43,8 +43,8 @@ export const LoginForm = ({ onSuccess, onSwitchToSignup }: LoginFormProps) => {
 
   return (
     <div className="w-full max-w-md p-6 mx-auto shadow-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl">
-      <h2 className="mb-6 text-2xl font-bold text-center text-gray-800 dark:text-white">
-        Log in to NoteMark
+      <h2 className="mb-6 text-2xl font-bold text-center text-cyan-400 dark:text-white">
+        Log in to Proto-Note
       </h2>
 
       {error && (
@@ -62,7 +62,7 @@ export const LoginForm = ({ onSuccess, onSwitchToSignup }: LoginFormProps) => {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-3 py-2 text-white border border-gray-300 rounded-md bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:text-white bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             required
           />
         </div>
@@ -75,7 +75,7 @@ export const LoginForm = ({ onSuccess, onSwitchToSignup }: LoginFormProps) => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 text-white border border-gray-300 rounded-md bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:text-white bg-white/80 dark:bg-gray-700/80 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             required
           />
         </div>
