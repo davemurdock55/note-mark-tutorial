@@ -2,7 +2,7 @@ import { appDirectoryName, fileEncoding, welcomeNoteFilename } from '@shared/con
 import { NoteInfo } from '@shared/models'
 import { CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote } from '@shared/types'
 import { dialog } from 'electron'
-import { ensureDir, readdir, readFile, remove, stat, writeFile } from 'fs-extra'
+import fs, { ensureDir, readdir, readFile, remove, stat, writeFile } from 'fs-extra'
 import { isEmpty } from 'lodash'
 import { homedir } from 'os'
 import path from 'path'
@@ -55,11 +55,27 @@ export const readNote: ReadNote = async (fileName) => {
   return await readFile(`${rootDir}/${fileName}.md`, { encoding: fileEncoding })
 }
 
-export const writeNote: WriteNote = async (fileName, content) => {
+export const writeNote: WriteNote = async (fileName, content, preserveTimestamp) => {
   const rootDir = getRootDir()
+  const filePath = `${rootDir}/${fileName}.md`
 
   console.info(`Writing note ${fileName}`)
-  return writeFile(`${rootDir}/${fileName}.md`, content, { encoding: fileEncoding })
+  await writeFile(filePath, content, { encoding: fileEncoding })
+
+  // If preserveTimestamp is provided, update the file's modification time
+  if (preserveTimestamp) {
+    try {
+      // Use fs.utimes to set the file's modification time
+      // Convert milliseconds to seconds for the API
+      const timeInSeconds = preserveTimestamp / 1000
+      await fs.utimes(filePath, timeInSeconds, timeInSeconds)
+      console.log(
+        `Preserved timestamp for ${fileName}: ${new Date(preserveTimestamp).toISOString()}`
+      )
+    } catch (error) {
+      console.error(`Failed to preserve timestamp for ${fileName}:`, error)
+    }
+  }
 }
 
 export const createNote: CreateNote = async () => {

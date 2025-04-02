@@ -25,9 +25,11 @@
     "@electron-toolkit/utils": "^3.0.0",
     "@mdxeditor/editor": "^3.20.0",
     "axios": "^1.8.4",
+    "crypto": "^1.0.1",
     "fs-extra": "^11.3.0",
     "jotai": "^2.11.0",
-    "lucide-react": "^0.484.0"
+    "lucide-react": "^0.484.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
