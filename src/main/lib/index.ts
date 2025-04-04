@@ -43,9 +43,18 @@ export const getNotes: GetNotes = async () => {
 export const getNoteInfoFromFileName = async (fileName: string): Promise<NoteInfo> => {
   const fileStats = await stat(`${getRootDir()}/${fileName}`)
 
+  // Try to get creation time, with fallbacks for unreliable file systems
+  let createdAtTime = fileStats.birthtimeMs
+
+  // If birthtime equals mtime or is in the future, it's likely not reliable
+  if (createdAtTime === fileStats.mtimeMs || createdAtTime > Date.now()) {
+    createdAtTime = fileStats.mtimeMs
+  }
+
   return {
     title: fileName.replace(/\.md$/, ''),
-    lastEditTime: fileStats.mtimeMs
+    lastEditTime: fileStats.mtimeMs,
+    createdAtTime: createdAtTime
   }
 }
 

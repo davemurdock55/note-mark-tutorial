@@ -92,7 +92,8 @@ export const syncNotesWithCloud = async () => {
     notesPayload.push({
       title,
       content,
-      lastEditTime: noteInfo.lastEditTime
+      lastEditTime: noteInfo.lastEditTime,
+      createdAtTime: noteInfo.createdAtTime
     })
   }
 
@@ -165,7 +166,6 @@ async function reconcileWithCloudNotes(cloudNotes: FullNote[], localNotes: FullN
   const cloudNotesMap = new Map<string, FullNote>()
   cloudNotes.forEach((note) => cloudNotesMap.set(note.title, note))
 
-  // 1. Update local notes with cloud notes
   // 1. Update local notes with cloud notes
   for (const cloudNote of cloudNotes) {
     // We'll always use the cloud version since the server has already
