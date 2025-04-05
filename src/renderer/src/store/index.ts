@@ -110,7 +110,7 @@ const selectedNoteAtomAsync = atom(async (get) => {
   if (selectedNoteIndex == null || !notes) return null
 
   // get the note at that selected note index
-  const selectedNote = notes[selectedNoteIndex]
+  const selectedNote: NoteInfo = notes[selectedNoteIndex]
 
   // get the content from the 'backend' using the title of the note
   const noteContent = await window.context.readNote(selectedNote.title)
@@ -128,21 +128,22 @@ export const selectedNoteAtom = unwrap(
     prev ?? {
       title: '',
       content: '',
-      lastEditTime: Date.now()
+      lastEditTime: Date.now(),
+      createdAtTime: Date.now()
     }
 )
 
 // For src/renderer/src/store/index.ts
 export const saveNoteAtom = atom(
   null,
-  async (get, set, params: { title: string; content: NoteContent }) => {
-    const { title, content } = params
+  async (get, set, params: { title: string; content: NoteContent; createdAtTime: number }) => {
+    const { title, content, createdAtTime } = params
     const notes = get(notesAtom)
 
     if (!notes) return
 
     // save on disk
-    await window.context.writeNote(title, content)
+    await window.context.writeNote(title, content, Date.now(), createdAtTime)
 
     // update the saved note's last edit time
     set(
@@ -171,7 +172,8 @@ export const createEmptyNoteAtom = atom(null, async (get, set) => {
 
   const newNote: NoteInfo = {
     title,
-    lastEditTime: Date.now()
+    lastEditTime: Date.now(),
+    createdAtTime: Date.now()
   }
 
   set(notesAtom, [newNote, ...notes.filter((note) => note.title !== newNote.title)])

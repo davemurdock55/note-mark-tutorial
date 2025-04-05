@@ -10,7 +10,8 @@ export type ReadNote = (title: NoteInfo['title']) => Promise<NoteContent>
 export type WriteNote = (
   title: NoteInfo['title'],
   content: NoteContent,
-  preserveTimestamp?: number
+  lastEditTime: number,
+  createdAtTime: number
 ) => Promise<void>
 export type CreateNote = () => Promise<NoteInfo['title'] | false>
 export type DeleteNote = (title: NoteInfo['title']) => Promise<boolean>

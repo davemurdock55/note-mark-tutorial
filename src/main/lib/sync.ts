@@ -166,21 +166,53 @@ async function reconcileWithCloudNotes(cloudNotes: FullNote[], localNotes: FullN
   const cloudNotesMap = new Map<string, FullNote>()
   cloudNotes.forEach((note) => cloudNotesMap.set(note.title, note))
 
+  // Track sync operations stats
+  let notesUpdated = 0
+  let notesDeleted = 0
+
   // 1. Update local notes with cloud notes
   for (const cloudNote of cloudNotes) {
-    // We'll always use the cloud version since the server has already
-    // performed the merge logic
-    console.log(`Updating local note: ${cloudNote.title}`)
-    await writeNote(cloudNote.title, cloudNote.content, cloudNote.lastEditTime)
-  }
+    const localNote = localNotesMap.get(cloudNote.title)
 
-  // 2. Delete local notes not in cloud (they were likely deleted elsewhere)
-  for (const [title, _] of localNotesMap.entries()) {
-    if (!cloudNotesMap.has(title)) {
-      console.log(`Deleting local note not found in cloud: ${title}`)
-      await deleteNote(title)
+    if (!localNote || cloudNote.lastEditTime > localNote.lastEditTime) {
+      // Note is either new or newer on server
+      console.log(`Updating local note: ${cloudNote.title} (${!localNote ? 'new' : 'modified'})`)
+      await writeNote(
+        cloudNote.title,
+        cloudNote.content,
+        cloudNote.lastEditTime,
+        cloudNote.createdAtTime
+      )
+      notesUpdated++
+    } else {
+      console.log(`Skipping note ${cloudNote.title} - local version is up to date`)
     }
   }
 
-  console.log('Reconciliation complete')
+  // 2. Delete local notes not in cloud (they were deleted elsewhere)
+  // 2. Delete local notes not in cloud (they were deleted elsewhere)
+  const deletePromises: Promise<void>[] = [] // Add type annotation here
+  for (const [title, _] of localNotesMap.entries()) {
+    if (!cloudNotesMap.has(title)) {
+      console.log(`Deleting local note not found in cloud: ${title}`)
+      deletePromises.push(
+        deleteNote(title)
+          .then(() => {
+            notesDeleted++
+          })
+          .catch((error) => {
+            console.error(`Failed to delete note ${title}:`, error)
+          })
+      )
+    }
+  }
+
+  // Wait for all delete operations to complete
+  if (deletePromises.length > 0) {
+    await Promise.all(deletePromises)
+  }
+
+  console.log(
+    `Reconciliation complete: ${notesUpdated} notes updated, ${notesDeleted} notes deleted`
+  )
 }

@@ -2,7 +2,17 @@ import { appDirectoryName, fileEncoding, welcomeNoteFilename } from '@shared/con
 import { NoteInfo } from '@shared/models'
 import { CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote } from '@shared/types'
 import { dialog } from 'electron'
-import fs, { ensureDir, readdir, readFile, remove, stat, writeFile } from 'fs-extra'
+import fs, {
+  ensureDir,
+  pathExists,
+  readdir,
+  readFile,
+  readJson,
+  remove,
+  stat,
+  writeFile,
+  writeJson
+} from 'fs-extra'
 import { isEmpty } from 'lodash'
 import { homedir } from 'os'
 import path from 'path'
@@ -42,8 +52,21 @@ export const getNotes: GetNotes = async () => {
 
 export const getNoteInfoFromFileName = async (fileName: string): Promise<NoteInfo> => {
   const fileStats = await stat(`${getRootDir()}/${fileName}`)
+  const title = fileName.replace(/\.md$/, '')
 
-  // Try to get creation time, with fallbacks for unreliable file systems
+  // First try to get metadata
+  const metadata = await getNoteMetadata(title)
+
+  if (metadata && metadata.createdAtTime) {
+    // Return with metadata creation time but current edit time
+    return {
+      title,
+      lastEditTime: fileStats.mtimeMs,
+      createdAtTime: metadata.createdAtTime
+    }
+  }
+
+  // Fall back to file system if no metadata exists
   let createdAtTime = fileStats.birthtimeMs
 
   // If birthtime equals mtime or is in the future, it's likely not reliable
@@ -52,9 +75,9 @@ export const getNoteInfoFromFileName = async (fileName: string): Promise<NoteInf
   }
 
   return {
-    title: fileName.replace(/\.md$/, ''),
+    title,
     lastEditTime: fileStats.mtimeMs,
-    createdAtTime: createdAtTime
+    createdAtTime
   }
 }
 
@@ -64,29 +87,57 @@ export const readNote: ReadNote = async (fileName) => {
   return await readFile(`${rootDir}/${fileName}.md`, { encoding: fileEncoding })
 }
 
-export const writeNote: WriteNote = async (fileName, content, preserveTimestamp) => {
+async function saveNoteMetadata(title: string, metadata: NoteInfo): Promise<void> {
+  const rootDir = getRootDir()
+  const metadataDir = path.join(rootDir, '.metadata')
+  await ensureDir(metadataDir)
+
+  const metadataPath = path.join(metadataDir, `${title}.json`)
+  await writeJson(metadataPath, metadata)
+}
+
+async function getNoteMetadata(title: string): Promise<NoteInfo | null> {
+  const rootDir = getRootDir()
+  const metadataPath = path.join(rootDir, '.metadata', `${title}.json`)
+
+  if (await pathExists(metadataPath)) {
+    return readJson(metadataPath)
+  }
+  return null
+}
+
+export const writeNote: WriteNote = async (
+  fileName,
+  content,
+  lastEditTime: number,
+  createdAtTime: number
+) => {
   const rootDir = getRootDir()
   const filePath = `${rootDir}/${fileName}.md`
 
   console.info(`Writing note ${fileName}`)
   await writeFile(filePath, content, { encoding: fileEncoding })
 
+  // Save creation time if provided
+  if (createdAtTime) {
+    await saveNoteMetadata(fileName, {
+      title: fileName,
+      lastEditTime: lastEditTime,
+      createdAtTime: createdAtTime
+    })
+  }
+
   // If preserveTimestamp is provided, update the file's modification time
-  if (preserveTimestamp) {
+  if (lastEditTime) {
     try {
-      // Use fs.utimes to set the file's modification time
       // Convert milliseconds to seconds for the API
-      const timeInSeconds = preserveTimestamp / 1000
+      const timeInSeconds = lastEditTime / 1000
       await fs.utimes(filePath, timeInSeconds, timeInSeconds)
-      console.log(
-        `Preserved timestamp for ${fileName}: ${new Date(preserveTimestamp).toISOString()}`
-      )
     } catch (error) {
       console.error(`Failed to preserve timestamp for ${fileName}:`, error)
     }
   }
 }
-
 export const createNote: CreateNote = async () => {
   const rootDir = getRootDir()
   await ensureDir(rootDir) // ensuring the root directory ('NoteMark') exists
@@ -121,6 +172,14 @@ export const createNote: CreateNote = async () => {
   console.info(`Creating note: ${filename}...`)
   await writeFile(filePath, '') // write the file to the dir with empty content
 
+  // Initialize metadata for new note with current timestamp
+  const now = Date.now()
+  await saveNoteMetadata(filename, {
+    title: filename,
+    lastEditTime: now,
+    createdAtTime: now
+  })
+
   return filename
 }
 
@@ -144,6 +203,12 @@ export const deleteNote: DeleteNote = async (filename) => {
   // if the user didn't press the "Cancel" button, proceed with deleting the note
   console.info(`Deleting note: ${filename}...`)
   await remove(`${rootDir}/${filename}.md`)
+
+  // Delete metadata file if it exists
+  const metadataPath = path.join(rootDir, '.metadata', `${filename}.json`)
+  if (await pathExists(metadataPath)) {
+    await remove(metadataPath)
+  }
 
   // the note should be successfully deleted now
   return true

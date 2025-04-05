@@ -3,6 +3,7 @@ import { selectedNoteAtom, saveNoteAtom, editorContentAtom } from '@renderer/sto
 import { Save, LoaderCircle } from 'lucide-react'
 import { ActionButton } from './ActionButton'
 import { useAtomValue, useSetAtom } from 'jotai'
+import { NoteInfo } from '@shared/models'
 
 export const SaveButton = () => {
   const [isSaving, setIsSaving] = useState(false)
@@ -14,16 +15,20 @@ export const SaveButton = () => {
     if (!selectedNote) return
 
     // Capture the current note title to prevent blur issues
-    const noteTitle = selectedNote.title
+    const noteToSave: NoteInfo = selectedNote
 
     setIsSaving(true)
 
     try {
-      console.log('Saving note:', noteTitle, 'with content length:', editorContent.length)
+      console.log('Saving note:', noteToSave.title, 'with content length:', editorContent.length)
 
       // Pass title explicitly along with content
-      await saveNote({ title: noteTitle, content: editorContent })
-      console.log('Note saved manually:', noteTitle)
+      await saveNote({
+        title: noteToSave.title,
+        content: editorContent,
+        createdAtTime: noteToSave.createdAtTime || Date.now()
+      })
+      console.log('Note saved manually:', noteToSave.title)
 
       // Optional: Add a small delay for UI feedback if saving is too fast
       // This ensures users see the saving indicator even for quick saves
