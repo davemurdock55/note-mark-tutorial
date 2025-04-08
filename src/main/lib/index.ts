@@ -17,6 +17,7 @@ import { isEmpty } from 'lodash'
 import { homedir } from 'os'
 import path from 'path'
 import welcomeNoteFile from '../../../resources/welcomeNote.md?asset'
+import { syncNotesWithCloud } from './sync'
 
 export const getRootDir = () => {
   return `${homedir()}/${appDirectoryName}`
@@ -35,17 +36,20 @@ export const getNotes: GetNotes = async () => {
 
   const notes = notesFileNames.filter((fileName) => fileName.endsWith('.md'))
 
-  if (isEmpty(notes)) {
-    console.info('No notes found. Creating a welcome note.')
-
-    const content = await readFile(welcomeNoteFile, { encoding: fileEncoding })
-
-    // create the welcome note
-    await writeFile(`${rootDir}/${welcomeNoteFilename}`, content, { encoding: fileEncoding })
-
-    // add that note to the "notes" array jotai state
-    notes.push(welcomeNoteFilename)
-  }
+  // [ ] - comment this out if you want to disable the welcome note
+  //   if (isEmpty(notes)) {
+  //     console.info('No notes found. Creating a welcome note.')
+  //
+  //     const content = await readFile(welcomeNoteFile, { encoding: fileEncoding })
+  //
+  //     // create the welcome note
+  //     await writeFile(`${rootDir}/${welcomeNoteFilename}`, content, { encoding: fileEncoding })
+  //
+  //     // add that note to the "notes" array jotai state
+  //     notes.push(welcomeNoteFilename)
+  //
+  //     syncNotesWithCloud()
+  //   }
 
   return Promise.all(notes.map(getNoteInfoFromFileName))
 }
