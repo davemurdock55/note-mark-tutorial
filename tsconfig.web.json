@@ -7,6 +7,12 @@
     "src/preload/*.d.ts",
     "src/shared/**/*",
   ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "out",
+    "build"
+  ],
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",
