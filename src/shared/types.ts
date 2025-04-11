@@ -14,5 +14,5 @@ export type WriteNote = (
   createdAtTime: number
 ) => Promise<void>
 export type CreateNote = () => Promise<NoteInfo['title'] | false>
-export type DeleteNote = (title: NoteInfo['title']) => Promise<boolean>
+export type DeleteNote = (title: NoteInfo['title'], confirmation?: boolean) => Promise<boolean>
 export type SyncNotesWithCloud = () => Promise<boolean>

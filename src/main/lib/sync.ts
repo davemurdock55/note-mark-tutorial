@@ -196,7 +196,7 @@ async function reconcileWithCloudNotes(cloudNotes: FullNote[], localNotes: FullN
     if (!cloudNotesMap.has(title)) {
       console.log(`Deleting local note not found in cloud: ${title}`)
       deletePromises.push(
-        deleteNote(title)
+        deleteNote(title, false)
           .then(() => {
             notesDeleted++
           })

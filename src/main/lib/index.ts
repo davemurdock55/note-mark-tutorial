@@ -1,4 +1,4 @@
-import { appDirectoryName, fileEncoding, welcomeNoteFilename } from '@shared/constants'
+import { appDirectoryName, fileEncoding } from '@shared/constants'
 import { NoteInfo } from '@shared/models'
 import { CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote } from '@shared/types'
 import { dialog } from 'electron'
@@ -187,21 +187,23 @@ export const createNote: CreateNote = async () => {
   return filename
 }
 
-export const deleteNote: DeleteNote = async (filename) => {
+export const deleteNote: DeleteNote = async (filename, confirmation = true) => {
   const rootDir = getRootDir()
 
-  const { response } = await dialog.showMessageBox({
-    type: 'warning',
-    title: 'Delete note',
-    message: `Are you sure you want to delete ${filename}?`,
-    buttons: ['Delete', 'Cancel'], // 0 is the Delete button, 1 is the Cancel button
-    defaultId: 1, // Cancel button will be the default selected button
-    cancelId: 1 // Mapping the cancelId to the cancel button
-  })
+  if (confirmation === true) {
+    const { response } = await dialog.showMessageBox({
+      type: 'warning',
+      title: 'Delete note',
+      message: `Are you sure you want to delete ${filename}?`,
+      buttons: ['Delete', 'Cancel'], // 0 is the Delete button, 1 is the Cancel button
+      defaultId: 1, // Cancel button will be the default selected button
+      cancelId: 1 // Mapping the cancelId to the cancel button
+    })
 
-  if (response === 1) {
-    console.info('Cancelled Deleting the Note')
-    return false
+    if (response === 1) {
+      console.info('Cancelled Deleting the Note')
+      return false
+    }
   }
 
   // if the user didn't press the "Cancel" button, proceed with deleting the note
