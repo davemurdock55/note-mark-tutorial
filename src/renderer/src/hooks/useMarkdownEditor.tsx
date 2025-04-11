@@ -3,8 +3,8 @@ import { saveNoteAtom, selectedNoteAtom, editorContentAtom } from '@renderer/sto
 import { autoSavingTime } from '@shared/constants'
 import { NoteContent } from '@shared/models'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { throttle } from 'lodash'
-import { useRef } from 'react'
+import { throttle, DebouncedFunc } from 'lodash' // Add DebouncedFunc type
+import { useRef, useEffect, useCallback } from 'react'
 
 export const useMarkdownEditor = () => {
   const selectedNote = useAtomValue(selectedNoteAtom)
@@ -12,22 +12,43 @@ export const useMarkdownEditor = () => {
   const editorRef = useRef<MDXEditorMethods>(null)
   const editorContent = useAtomValue(editorContentAtom)
 
-  const handleAutoSaving = throttle(
-    async (content: NoteContent) => {
-      if (!selectedNote) return
+  // Use proper typing instead of any
+  const throttledSaveRef = useRef<DebouncedFunc<(content: NoteContent) => Promise<void>> | null>(null)
 
-      // Capture the current title to prevent race conditions
-      const noteTitle = selectedNote.title
+  // Set up the throttled function when dependencies change
+  useEffect(() => {
+    throttledSaveRef.current = throttle(
+      async (content: NoteContent) => {
+        if (!selectedNote) return
 
-      console.info('Auto saving: ', noteTitle, '...')
-      await saveNote({ title: noteTitle, content })
-    },
-    autoSavingTime,
-    {
-      leading: false,
-      trailing: true
+        // Capture the current title to prevent race conditions
+        const noteTitle = selectedNote.title
+        const noteCreatedAt = selectedNote.createdAtTime
+
+        console.info('Auto saving: ', noteTitle, '...')
+        await saveNote({ title: noteTitle, content, createdAtTime: noteCreatedAt })
+      },
+      autoSavingTime,
+      {
+        leading: false,
+        trailing: true
+      }
+    )
+
+    // Cleanup throttle when component unmounts or dependencies change
+    return () => {
+      if (throttledSaveRef.current) {
+        throttledSaveRef.current.cancel()
+      }
     }
-  )
+  }, [selectedNote, saveNote])
+
+  // Stable wrapper function
+  const handleAutoSaving = useCallback((content: NoteContent) => {
+    if (throttledSaveRef.current) {
+      throttledSaveRef.current(content)
+    }
+  }, [])
 
   const handleTextEditorBlur = async () => {
     if (!selectedNote) return
@@ -35,8 +56,14 @@ export const useMarkdownEditor = () => {
     // Capture title before any potential state changes
     const noteTitle = selectedNote.title
 
-    handleAutoSaving.cancel()
-    await saveNote({ title: noteTitle, content: editorContent })
+    if (throttledSaveRef.current) {
+      throttledSaveRef.current.cancel()
+    }
+    await saveNote({
+      title: noteTitle,
+      content: editorContent,
+      createdAtTime: selectedNote.createdAtTime
+    })
   }
 
   const handleBlur = async () => {
@@ -45,11 +72,13 @@ export const useMarkdownEditor = () => {
     // Capture title before any potential state changes
     const noteTitle = selectedNote.title
 
-    handleAutoSaving.cancel()
+    if (throttledSaveRef.current) {
+      throttledSaveRef.current.cancel()
+    }
     const content = editorRef.current?.getMarkdown()
 
     if (content != null) {
-      await saveNote({ title: noteTitle, content })
+      await saveNote({ title: noteTitle, content, createdAtTime: selectedNote.createdAtTime })
     }
   }
 
