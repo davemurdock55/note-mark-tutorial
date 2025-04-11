@@ -1,31 +1,102 @@
 import {
-  ActionButtonsRow,
-  Content,
-  DraggableTopBar,
-  TitleBar,
-  NotePreviewList,
-  RootLayout,
-  Sidebar,
-  TextEditor
+  ActionButtonsRow, Content, DraggableTopBar, 
+  NotePreviewList, RootLayout, Sidebar, TextEditor
 } from '@/components'
 import { AuthPage } from '@/components/Auth/AuthPage'
-import { useRef } from 'react'
-import { useAtomValue } from 'jotai'
-import { currentUserAtom } from '@renderer/store'
+import { useRef, useState, useEffect } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { authLoadingAtom, currentUserAtom } from '@renderer/store'
 
 const App = () => {
   const contentContainerRef = useRef<HTMLDivElement>(null)
   const user = useAtomValue(currentUserAtom)
+  const isAuthLoading = useAtomValue(authLoadingAtom)
+  const setAuthLoading = useSetAtom(authLoadingAtom)
+  const [elapsed, setElapsed] = useState(0)
+  const [showUI, setShowUI] = useState(false)
+  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading')
 
   const resetScroll = () => {
     contentContainerRef.current?.scrollTo(0, 0)
   }
 
-  // If not logged in, show auth page
-  if (!user.isLoggedIn) {
-    return <AuthPage onAuthenticated={() => {}} />
+  // Effect to update auth status when user info is available
+  useEffect(() => {
+    if (user) {
+      setAuthLoading(false)
+      setAuthStatus(user.isLoggedIn ? 'authenticated' : 'unauthenticated')
+    }
+  }, [user, setAuthLoading])
+
+  // Effect to handle completed authentication flow
+  useEffect(() => {
+    if (!isAuthLoading) {
+      // Add a small delay before showing UI to allow everything to initialize
+      const timer = setTimeout(() => {
+        setShowUI(true)
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [isAuthLoading])
+
+  // Timer to track how long we've been in loading state
+  useEffect(() => {
+    if (!isAuthLoading) return
+    
+    const timer = setInterval(() => {
+      setElapsed(prev => prev + 1)
+    }, 1000)
+    
+    return () => clearInterval(timer)
+  }, [isAuthLoading])
+  
+  // Force exit loading state after delay
+  useEffect(() => {
+    if (!isAuthLoading || elapsed < 10) return
+    
+    console.log('Force exiting loading state after timeout')
+    window.location.reload()
+  }, [elapsed, isAuthLoading])
+  
+  // Add this to force exit loading state after a delay
+  useEffect(() => {
+    if (!user?.isLoggedIn || !isAuthLoading) return
+    
+    const forceTimeout = setTimeout(() => {
+      console.log('Detected logged in user but still loading - forcing app to load')
+      window.location.reload()
+    }, 3000)
+    
+    return () => clearTimeout(forceTimeout)
+  }, [user, isAuthLoading])
+
+  // Always show loading screen until we have a definite auth status and UI is ready
+  if (isAuthLoading || !showUI || authStatus === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <DraggableTopBar />
+        <div className="text-center">
+          <div className="inline-block w-8 h-8 border-4 rounded-full animate-spin border-cyan-400 border-t-transparent"></div>
+
+          {elapsed >= 5 && (
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 mt-4 text-sm text-white transition-colors rounded-md bg-cyan-500 hover:bg-cyan-600"
+            >
+              Reload?
+            </button>
+          )}
+        </div>
+      </div>
+    )
   }
 
+  // Only switch to the appropriate UI after loading is complete
+  if (authStatus === 'unauthenticated') {
+    return <AuthPage onAuthenticated={() => setAuthStatus('authenticated')} />
+  }
+
+  // User is authenticated - show main app
   return (
     <>
       <DraggableTopBar />
@@ -34,7 +105,6 @@ const App = () => {
           <ActionButtonsRow className="flex justify-between mt-1" />
           <NotePreviewList className="mt-3 space-y-1" onSelect={resetScroll} />
         </Sidebar>
-
         <Content
           ref={contentContainerRef}
           className="text-gray-700 border-l dark:text-white bg-white/50 dark:bg-gray-900/50 border-l-white/20"

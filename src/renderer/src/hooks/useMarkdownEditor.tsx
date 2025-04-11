@@ -13,7 +13,9 @@ export const useMarkdownEditor = () => {
   const editorContent = useAtomValue(editorContentAtom)
 
   // Use proper typing instead of any
-  const throttledSaveRef = useRef<DebouncedFunc<(content: NoteContent) => Promise<void>> | null>(null)
+  const throttledSaveRef = useRef<DebouncedFunc<(content: NoteContent) => Promise<void>> | null>(
+    null
+  )
 
   // Set up the throttled function when dependencies change
   useEffect(() => {

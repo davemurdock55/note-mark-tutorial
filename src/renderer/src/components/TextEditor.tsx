@@ -116,20 +116,20 @@ export const TextEditor = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check for Ctrl+S or Cmd+S (metaKey is Command on Mac)
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault(); // Prevent browser's default save
-        console.log('Manual save triggered with keyboard shortcut');
-        handleTextEditorBlur(); // Use the same save handler as on blur
+        e.preventDefault() // Prevent browser's default save
+        console.log('Manual save triggered with keyboard shortcut')
+        handleTextEditorBlur() // Use the same save handler as on blur
       }
     }
 
     // Add global event listener
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown)
 
     // Cleanup on unmount
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [handleTextEditorBlur]); // Add handleTextEditorBlur to dependency array
+  }, [handleTextEditorBlur]) // Add handleTextEditorBlur to dependency array
 
   // if there is no selected note, don't return the editor
   if (!selectedNote) return null

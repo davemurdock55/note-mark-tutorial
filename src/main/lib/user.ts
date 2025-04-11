@@ -143,13 +143,69 @@ export const logout = async (): Promise<boolean> => {
   }
 }
 
+export const verifyToken = async (username: string, token: string): Promise<UserCredentials> => {
+  try {
+    // Call the verify endpoint
+    const response = await axios.post(
+      `${AUTH_ENDPOINT}/verify`,
+      {
+        username,
+        token
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    console.log('verification response:', response.data)
+
+    if (response.data.verified) {
+      // Token is valid, return user credentials
+      return {
+        name: response.data.name || 'User', // Use name from response or default
+        username,
+        token,
+        isLoggedIn: true
+      }
+    } else {
+      console.log('Token verification failed:', response.data.message)
+      return defaultUserState
+    }
+  } catch (error) {
+    console.error('Token verification failed:', error)
+    return defaultUserState
+  }
+}
+
 export const getCurrentUser = async (): Promise<UserCredentials> => {
   const credentialsPath = getUserCredentialsPath()
 
   try {
     if (await pathExists(credentialsPath)) {
       const userData = await readFile(credentialsPath, { encoding: fileEncoding })
-      return JSON.parse(userData)
+      const savedCredentials = JSON.parse(userData) as UserCredentials
+
+      // If we have saved credentials with a token, verify it
+      if (savedCredentials.token && savedCredentials.username) {
+        console.log('Found saved credentials, verifying token...')
+        const verifiedCredentials = await verifyToken(
+          savedCredentials.username,
+          savedCredentials.token
+        )
+
+        if (verifiedCredentials.isLoggedIn) {
+          // Token is valid, preserve the name from saved credentials
+          return {
+            ...verifiedCredentials,
+            name: savedCredentials.name || verifiedCredentials.name
+          }
+        }
+
+        // If token verification failed, clear credentials and return default state
+        console.log('Saved token is invalid, clearing credentials')
+        await clearUserCredentials()
+      }
     }
     return defaultUserState
   } catch (error) {

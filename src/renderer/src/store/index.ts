@@ -3,19 +3,41 @@ import { atom } from 'jotai'
 import { unwrap } from 'jotai/utils'
 import { UserCredentials, defaultUserState } from '@shared/auth-types'
 
-// Load current user on app start
+// First, create a writable version of the auth loading atom
+export const authLoadingAtom = atom(true)
+
+// Define the function before using it
 const loadCurrentUser = async () => {
   try {
-    return await window.context.getCurrentUser()
+    const timeoutPromise = new Promise<UserCredentials>((resolve) => {
+      setTimeout(() => {
+        console.warn('Auth verification timed out, using default state')
+        resolve(defaultUserState)
+      }, 5000)
+    })
+
+    const user = await Promise.race([window.context.getCurrentUser(), timeoutPromise])
+    console.log('User loaded:', user.isLoggedIn ? 'Logged in' : 'Not logged in')
+
+    return user
   } catch (error) {
     console.error('Failed to load user:', error)
     return defaultUserState
   }
 }
 
-// Create auth atoms
-const currentUserAtomAsync = atom<UserCredentials | Promise<UserCredentials>>(loadCurrentUser())
+// Now use the function
+const currentUserAtomAsync = atom(loadCurrentUser())
+
+// Unwrap the async atom
 export const currentUserAtom = unwrap(currentUserAtomAsync, (prev) => prev || defaultUserState)
+
+// Create a derived atom that controls the loading state based on user state
+export const authCompletedAtom = atom((get) => {
+  const user = get(currentUserAtom)
+  // When user is loaded (whether logged in or not), authentication is complete
+  return !!user
+})
 
 export const loginAtom = atom(
   null,
