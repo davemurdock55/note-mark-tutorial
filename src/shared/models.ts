@@ -1,4 +1,4 @@
-// Used for note metadata (e.g. in the sidebar)
+// used for note metadata (e.g. in the sidebar)
 export type NoteInfo = {
   title: string
   lastEditTime: number

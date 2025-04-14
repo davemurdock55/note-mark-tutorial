@@ -18,7 +18,7 @@ export const AccountMenu = ({ setIsAccountMenuOpen }: AccountMenuProps) => {
     setIsAccountMenuOpen(false)
   }
 
-  // Handle clicks outside with event listener approach
+  // Using an event listener to close the menu when clicking outside of it
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       // Only close if not clicking within the menu itself
@@ -35,7 +35,7 @@ export const AccountMenu = ({ setIsAccountMenuOpen }: AccountMenuProps) => {
     }
   }, [setIsAccountMenuOpen])
 
-  // Create a portal to render menu at root level
+  // Creating a portal to render the Account Menu at root level
   return createPortal(
     <div className="absolute z-50 w-56 overflow-hidden shadow-xl account-menu-content right-3 top-12 rounded-xl">
       {/* Two-layer blur technique - similar to what's used in TitleBar */}

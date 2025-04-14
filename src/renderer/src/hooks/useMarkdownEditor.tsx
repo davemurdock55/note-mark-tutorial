@@ -17,7 +17,7 @@ export const useMarkdownEditor = () => {
     null
   )
 
-  // Set up the throttled function when dependencies change
+  // Throttling the save function to prevent excessive calls
   useEffect(() => {
     throttledSaveRef.current = throttle(
       async (content: NoteContent) => {
