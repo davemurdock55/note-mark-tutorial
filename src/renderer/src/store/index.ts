@@ -3,10 +3,10 @@ import { atom } from 'jotai'
 import { unwrap } from 'jotai/utils'
 import { UserCredentials, defaultUserState } from '@shared/auth-types'
 
-// First, create a writable version of the auth loading atom
+// Atom for if the auth state is loading
 export const authLoadingAtom = atom(true)
 
-// Define the function before using it
+// Function to load the current user
 const loadCurrentUser = async () => {
   try {
     const timeoutPromise = new Promise<UserCredentials>((resolve) => {
@@ -26,13 +26,12 @@ const loadCurrentUser = async () => {
   }
 }
 
-// Now use the function
 const currentUserAtomAsync = atom(loadCurrentUser())
 
-// Unwrap the async atom
+// Unwrapping the async currentUser atom
 export const currentUserAtom = unwrap(currentUserAtomAsync, (prev) => prev || defaultUserState)
 
-// Create a derived atom that controls the loading state based on user state
+// Atom to control the loading state based on user state
 export const authCompletedAtom = atom((get) => {
   const user = get(currentUserAtom)
   // When user is loaded (whether logged in or not), authentication is complete
@@ -155,7 +154,7 @@ export const selectedNoteAtom = unwrap(
     }
 )
 
-// For src/renderer/src/store/index.ts
+
 export const saveNoteAtom = atom(
   null,
   async (get, set, params: { title: string; content: NoteContent; createdAtTime: number }) => {

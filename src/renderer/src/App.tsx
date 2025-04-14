@@ -68,15 +68,7 @@ const App = () => {
     return () => clearInterval(timer)
   }, [isAuthLoading, enforceMinimumLoadingTime])
 
-  // Force exit loading state after delay
-  useEffect(() => {
-    if ((!isAuthLoading && !enforceMinimumLoadingTime) || elapsed < 10) return
-
-    console.log('Force exiting loading state after timeout')
-    window.location.reload()
-  }, [elapsed, isAuthLoading, enforceMinimumLoadingTime])
-
-  // Add this to force exit loading state after a delay
+  // Effect to force exit loading state after delay
   useEffect(() => {
     if (!user?.isLoggedIn || (!isAuthLoading && !enforceMinimumLoadingTime)) return
 
@@ -87,18 +79,6 @@ const App = () => {
 
     return () => clearTimeout(forceTimeout)
   }, [user, isAuthLoading, enforceMinimumLoadingTime])
-
-  // Add this to force exit loading state after a delay
-  useEffect(() => {
-    if (!user?.isLoggedIn || !isAuthLoading) return
-
-    const forceTimeout = setTimeout(() => {
-      console.log('Detected logged in user but still loading - forcing app to load')
-      window.location.reload()
-    }, 3000)
-
-    return () => clearTimeout(forceTimeout)
-  }, [user, isAuthLoading])
 
   // Always show loading screen until we have a definite auth status and UI is ready
   if (isAuthLoading || enforceMinimumLoadingTime || !showUI || authStatus === 'loading') {
