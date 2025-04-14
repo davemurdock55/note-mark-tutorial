@@ -1,4 +1,4 @@
-# note-mark
+# Proto-Note Desktop
 
 An Electron application with React and TypeScript
 

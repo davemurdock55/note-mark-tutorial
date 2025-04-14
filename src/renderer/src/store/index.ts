@@ -52,7 +52,7 @@ export const loginAtom = atom(
         return { success: false, message: user.errorMessage }
       }
 
-      set(currentUserAtom, user)
+      set(currentUserAtom, Promise.resolve(user))
       return { success: user.isLoggedIn, message: '' }
     } catch (error) {
       console.error('Login error:', error)
@@ -77,7 +77,7 @@ export const signupAtom = atom(
         return { success: false, message: user.errorMessage }
       }
 
-      set(currentUserAtom, user)
+      set(currentUserAtom, Promise.resolve(user))
       return { success: user.isLoggedIn, message: '' }
     } catch (error) {
       console.error('Signup error:', error)
@@ -93,7 +93,7 @@ export const logoutAtom = atom(null, async (get, set) => {
   try {
     const success = await window.context.logout()
     if (success) {
-      set(currentUserAtom, defaultUserState)
+      set(currentUserAtom, Promise.resolve(defaultUserState))
     }
     return success
   } catch (error) {
@@ -228,16 +228,44 @@ export const deleteNoteAtom = atom(null, async (get, set) => {
 
 export const syncNotesAtom = atom(null, async (get, set) => {
   const notes = get(notesAtom)
+  const currentSelectedIndex = get(selectedNoteIndexAtom)
+  const selectedNote = get(selectedNoteAtom)
 
   if (!notes) return
 
   try {
+    // Keep track of selected note title before sync
+    const currentTitle = currentSelectedIndex !== null ? notes[currentSelectedIndex]?.title : null
+
     // Sync notes to cloud
     await window.context.syncNotesWithCloud()
 
     // Refresh the notes list
     const updatedNotes = await loadNotes()
     set(notesAtom, updatedNotes)
+
+    // Force-refresh note content if we had a note selected
+    if (currentTitle) {
+      // First clear the selection
+      set(selectedNoteIndexAtom, null)
+      set(editorContentAtom, '') // Clear editor content
+
+      // Find the note in the updated list
+      const newIndex = updatedNotes.findIndex((note) => note.title === currentTitle)
+
+      // If note still exists, reselect it (which will trigger a fresh load)
+      if (newIndex !== -1) {
+        // Use setTimeout to ensure this happens after React processes the previous state changes
+        setTimeout(async () => {
+          // Set new index to trigger content reload
+          set(selectedNoteIndexAtom, newIndex)
+
+          // Explicitly fetch fresh content from disk and update editor content
+          const freshContent = await window.context.readNote(currentTitle)
+          set(editorContentAtom, freshContent)
+        }, 50) // Slightly longer delay to ensure file system operations complete
+      }
+    }
 
     return true
   } catch (error) {
