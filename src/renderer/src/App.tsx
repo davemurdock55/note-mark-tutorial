@@ -1,6 +1,11 @@
 import {
-  ActionButtonsRow, Content, DraggableTopBar, 
-  NotePreviewList, RootLayout, Sidebar, TextEditor
+  ActionButtonsRow,
+  Content,
+  DraggableTopBar,
+  NotePreviewList,
+  RootLayout,
+  Sidebar,
+  TextEditor
 } from '@/components'
 import { AuthPage } from '@/components/Auth/AuthPage'
 import { useRef, useState, useEffect } from 'react'
@@ -14,7 +19,10 @@ const App = () => {
   const setAuthLoading = useSetAtom(authLoadingAtom)
   const [elapsed, setElapsed] = useState(0)
   const [showUI, setShowUI] = useState(false)
-  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading')
+  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>(
+    'loading'
+  )
+  const [enforceMinimumLoadingTime, setEnforceMinimumLoadingTime] = useState(true)
 
   const resetScroll = () => {
     contentContainerRef.current?.scrollTo(0, 0)
@@ -23,60 +31,83 @@ const App = () => {
   // Effect to update auth status when user info is available
   useEffect(() => {
     if (user) {
-      setAuthLoading(false)
+      // Don't immediately set authLoading to false - we'll do that after minimum time
+      // setAuthLoading(false); - removed
       setAuthStatus(user.isLoggedIn ? 'authenticated' : 'unauthenticated')
+
+      // Start the timer for minimum loading display
+      const minTimer = setTimeout(() => {
+        setEnforceMinimumLoadingTime(false)
+        setAuthLoading(false) // Now we can finish loading
+      }, 1000) // Show loading for at least 1 second
+
+      return () => clearTimeout(minTimer)
     }
   }, [user, setAuthLoading])
 
   // Effect to handle completed authentication flow
   useEffect(() => {
-    if (!isAuthLoading) {
+    if (!isAuthLoading && !enforceMinimumLoadingTime) {
+      // Only proceed when both conditions are met
       // Add a small delay before showing UI to allow everything to initialize
       const timer = setTimeout(() => {
         setShowUI(true)
       }, 300)
       return () => clearTimeout(timer)
     }
-  }, [isAuthLoading])
+  }, [isAuthLoading, enforceMinimumLoadingTime])
 
   // Timer to track how long we've been in loading state
   useEffect(() => {
-    if (!isAuthLoading) return
-    
+    if (!isAuthLoading && !enforceMinimumLoadingTime) return
+
     const timer = setInterval(() => {
-      setElapsed(prev => prev + 1)
+      setElapsed((prev) => prev + 1)
     }, 1000)
-    
+
     return () => clearInterval(timer)
-  }, [isAuthLoading])
-  
+  }, [isAuthLoading, enforceMinimumLoadingTime])
+
   // Force exit loading state after delay
   useEffect(() => {
-    if (!isAuthLoading || elapsed < 10) return
-    
+    if ((!isAuthLoading && !enforceMinimumLoadingTime) || elapsed < 10) return
+
     console.log('Force exiting loading state after timeout')
     window.location.reload()
-  }, [elapsed, isAuthLoading])
-  
+  }, [elapsed, isAuthLoading, enforceMinimumLoadingTime])
+
   // Add this to force exit loading state after a delay
   useEffect(() => {
-    if (!user?.isLoggedIn || !isAuthLoading) return
-    
+    if (!user?.isLoggedIn || (!isAuthLoading && !enforceMinimumLoadingTime)) return
+
     const forceTimeout = setTimeout(() => {
       console.log('Detected logged in user but still loading - forcing app to load')
       window.location.reload()
     }, 3000)
-    
+
+    return () => clearTimeout(forceTimeout)
+  }, [user, isAuthLoading, enforceMinimumLoadingTime])
+
+  // Add this to force exit loading state after a delay
+  useEffect(() => {
+    if (!user?.isLoggedIn || !isAuthLoading) return
+
+    const forceTimeout = setTimeout(() => {
+      console.log('Detected logged in user but still loading - forcing app to load')
+      window.location.reload()
+    }, 3000)
+
     return () => clearTimeout(forceTimeout)
   }, [user, isAuthLoading])
 
   // Always show loading screen until we have a definite auth status and UI is ready
-  if (isAuthLoading || !showUI || authStatus === 'loading') {
+  if (isAuthLoading || enforceMinimumLoadingTime || !showUI || authStatus === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <DraggableTopBar />
         <div className="text-center">
-          <div className="inline-block w-8 h-8 border-4 rounded-full animate-spin border-cyan-400 border-t-transparent"></div>
+          <h1 className="text-4xl font-semibold text-cyan-400">Proto-Note</h1>
+          <div className="inline-block mt-8 border-4 rounded-full size-10 animate-spin border-cyan-400 border-t-transparent"></div>
 
           {elapsed >= 5 && (
             <button

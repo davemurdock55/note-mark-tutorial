@@ -21,7 +21,7 @@ export const TitleBar = ({ className, ...props }: ComponentProps<'div'>) => {
       <div className="flex-1">
         <SyncButton />
       </div>
-      <span className="font-medium text-cyan-400">
+      <span className="font-semibold text-cyan-400">
         {selectedNote ? selectedNote.title : 'Proto-Note'}
       </span>
       <div className="flex justify-end flex-1 gap-2">
