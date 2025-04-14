@@ -1,7 +1,7 @@
 # Proto-Note Desktop
 Proto-Note is a simple notes app that allows syncing across different devices (taking an offline-first approach).
 
-The syncing uses AWS lambdas to perform its work and stores the necessary data (e.g. auth info, notes info, etc.) in DynmoDB.
+The syncing uses AWS lambdas to perform its work and stores the necessary data (e.g. auth info, notes info, etc.) in DynamoDB.
 
 ## Project Setup
 Below are the steps to set up and test the project:
