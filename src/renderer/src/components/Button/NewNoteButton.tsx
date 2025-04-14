@@ -11,12 +11,8 @@ export const NewNoteButton = ({ ...props }: ActionButtonProps) => {
   }
 
   return (
-    <ActionButton
-      onClick={handleCreation}
-      className="hover:bg-slate-300/50 hover:text-gray-500"
-      {...props}
-    >
-      <SquarePen className="w-4 h-4 text-zinc-500 dark:text-zinc-300" />
+    <ActionButton onClick={handleCreation} {...props}>
+      <SquarePen className="size-4" />
     </ActionButton>
   )
 }

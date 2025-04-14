@@ -42,14 +42,12 @@ export const SaveButton = () => {
 
   return (
     <ActionButton
-      className={`hover:bg-slate-300/50 hover:text-gray-500 ${isSaving ? 'bg-slate-200 hover:bg-slate-200 dark:hover:bg-zinc-400' : ''}`}
+      className={`${isSaving ? 'bg-slate-300/25 dark:hover:text-cyan-400' : ''}`}
       onClick={handleManualSave}
       disabled={isSaving}
     >
       {!isSaving ? (
-        <Save
-          className={`size-5 ${isSaving ? 'text-cyan-400' : 'text-zinc-500 dark:text-zinc-300'}`}
-        />
+        <Save className="size-5" />
       ) : (
         <LoaderCircle className="size-5 text-cyan-400 animate-spin" />
       )}

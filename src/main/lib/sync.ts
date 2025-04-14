@@ -190,7 +190,6 @@ async function reconcileWithCloudNotes(cloudNotes: FullNote[], localNotes: FullN
   }
 
   // 2. Delete local notes not in cloud (they were deleted elsewhere)
-  // 2. Delete local notes not in cloud (they were deleted elsewhere)
   const deletePromises: Promise<void>[] = [] // Add type annotation here
   for (const [title, _] of localNotesMap.entries()) {
     if (!cloudNotesMap.has(title)) {

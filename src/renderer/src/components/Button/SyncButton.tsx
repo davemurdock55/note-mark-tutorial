@@ -22,12 +22,12 @@ export const SyncButton = () => {
 
   return (
     <ActionButton
-      className={`hover:bg-slate-300/50 hover:text-gray-500 ${isSyncing ? 'bg-slate-200' : ''}`}
+      className={`${isSyncing ? 'bg-slate-300/25 dark:hover:text-cyan-400' : ''}`}
       onClick={handleSync}
       disabled={isSyncing}
     >
       {!isSyncing ? (
-        <Cloud className="size-5 text-zinc-500 dark:text-zinc-300" />
+        <Cloud className="size-5" />
       ) : (
         <LoaderCircle className="size-5 text-cyan-500 animate-spin" />
       )}

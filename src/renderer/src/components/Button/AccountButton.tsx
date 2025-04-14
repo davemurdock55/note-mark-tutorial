@@ -9,7 +9,7 @@ export const AccountButton = () => {
   return (
     <>
       <ActionButton
-        className="hover:bg-slate-300/50 text-zinc-500 dark:text-zinc-300 hover:text-gray-500 dark:hover:text-cyan-400 dark:active:bg-slate-400/50"
+        // className="text-zinc-500 hover:bg-slate-300/50 hover:text-gray-500 dark:text-zinc-300 dark:hover:text-cyan-400 dark:active:bg-slate-400/50"
         onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
       >
         <CircleUserRound className="size-5" />

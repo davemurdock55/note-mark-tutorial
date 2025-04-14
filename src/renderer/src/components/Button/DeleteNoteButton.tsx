@@ -11,12 +11,8 @@ export const DeleteNoteButton = ({ ...props }: ActionButtonProps) => {
   }
 
   return (
-    <ActionButton
-      onClick={handleDelete}
-      className="hover:bg-slate-300/50 hover:text-gray-500"
-      {...props}
-    >
-      <Trash2 className="w-4 h-4 text-zinc-500 dark:text-zinc-300" />
+    <ActionButton onClick={handleDelete} {...props}>
+      <Trash2 className="size-4" />
     </ActionButton>
   )
 }
